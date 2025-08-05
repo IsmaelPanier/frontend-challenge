@@ -1,182 +1,149 @@
-import React, { useState, useEffect } from 'react';
-import { useFormContext, useFieldArray } from 'react-hook-form';
+import React, { useState } from 'react';
+// import { useFormContext } from 'react-hook-form';
 import {
   Paper,
   Typography,
   Box,
   Stack,
+  Button,
+  TextField,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  FormControlLabel,
-  Switch,
-  TextField,
-  Collapse,
   IconButton,
-  Chip,
-  Button,
+  useMediaQuery,
+  useTheme,
+  Collapse,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Switch,
+  FormControlLabel,
+  Tooltip,
 } from '@mui/material';
 import {
-  ExpandMore,
-  ExpandLess,
   Add,
-  ShoppingCart,
-  Person,
   Delete,
-  Lightbulb,
-  GpsFixed,
+  Edit,
+  ExpandLess,
+  ExpandMore,
+  Info,
 } from '@mui/icons-material';
-import type { Campaign, Conditions } from '../../doc/CampaignType';
+// import type { Campaign } from '../types/campaign';
+
+// Types pour les gains et conditions personnalisées
+interface GiftCondition {
+  id: string;
+  giftName: string;
+  condition: string;
+  minAmount?: number;
+}
 
 const RetrievalConditionsSection: React.FC = () => {
-  const { control, watch, setValue } = useFormContext<Campaign>();
-  const { append, remove } = useFieldArray({
-    control,
-    name: 'configuration.retrievalConditions',
-  });
+  // const { control, watch, setValue } = useFormContext<Campaign>();
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [isExpanded, setIsExpanded] = useState(true);
-  const [allGifts, setAllGifts] = useState(false);
-  const [hasMinimumPurchase, setHasMinimumPurchase] = useState(false);
-  const [minimumAmount, setMinimumAmount] = useState<number>(10);
-  const [isModified, setIsModified] = useState(false);
-  const [lastSaved, setLastSaved] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCondition, setEditingCondition] = useState<GiftCondition | null>(null);
+  const [selectedGift, setSelectedGift] = useState('');
+  const [conditionType, setConditionType] = useState('none');
+  const [minAmount, setMinAmount] = useState('');
+  
+  // Switches pour les conditions générales
+  const [forAllWins, setForAllWins] = useState(true);
+  const [requiresPurchase, setRequiresPurchase] = useState(false);
 
-  // Charger les données depuis localStorage au démarrage
-  React.useEffect(() => {
-    const savedCampaign = localStorage.getItem('campaign');
-    if (savedCampaign) {
-      try {
-        const parsedCampaign = JSON.parse(savedCampaign);
-        setValue('configuration.gifts', parsedCampaign.configuration.gifts);
-        setValue('configuration.retrievalConditions', parsedCampaign.configuration.retrievalConditions);
-        setLastSaved(new Date(parsedCampaign.updated_at).toLocaleString());
-      } catch (error) {
-        console.error('Erreur lors du chargement:', error);
-      }
-    }
-  }, [setValue]);
+  // Simuler des gains existants (normalement récupérés depuis la configuration)
+  const availableGifts = [
+    { id: '1', name: 'Frite' },
+    { id: '2', name: 'Sac Jacquemus' },
+    { id: '3', name: 'Café offert' },
+    { id: '4', name: 'Dessert gratuit' },
+  ];
 
-  // Détecter les modifications
-  React.useEffect(() => {
-    const subscription = watch(() => {
-      setIsModified(true);
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
+  // Conditions personnalisées par gain (simulées)
+  const [giftConditions, setGiftConditions] = useState<GiftCondition[]>([
+    {
+      id: '1',
+      giftName: 'Frite',
+      condition: 'Aucune',
+    },
+    {
+      id: '2', 
+      giftName: 'Sac Jacquemus',
+      condition: 'Achat minimum de 10€',
+      minAmount: 10,
+    },
+  ]);
 
-  const gifts = watch('configuration.gifts') || [];
-  const conditions = watch('configuration.retrievalConditions') || [];
-
-  // Synchroniser les conditions avec les gains
-  useEffect(() => {
-    const currentConditions = conditions;
-    const giftIds = gifts.map((gift: any) => gift.id);
-    
-    // Supprimer les conditions pour les gains qui n'existent plus
-    const validConditions = currentConditions.filter((condition: any) => 
-      giftIds.includes(condition.id) || condition.id === 'global'
-    );
-    
-    // Ajouter des conditions pour les nouveaux gains
-    const newConditions = [...validConditions];
-    
-    gifts.forEach((gift: any) => {
-      if (!newConditions.find((c: any) => c.id === gift.id)) {
-        newConditions.push({
-          id: gift.id,
-          name: gift.name,
-          value: 'Aucune condition spécifique',
-        });
-      }
-    });
-
-    // Mettre à jour uniquement si les conditions ont changé
-    if (JSON.stringify(newConditions) !== JSON.stringify(currentConditions)) {
-      setValue('configuration.retrievalConditions', newConditions);
-    }
-  }, [gifts, conditions, setValue]);
-
-  // Gérer l'interrupteur "Pour tous les gains"
-  useEffect(() => {
-    if (allGifts) {
-      // Créer ou mettre à jour la condition globale
-      const globalCondition = conditions.find((c: any) => c.id === 'global');
-      if (!globalCondition) {
-        const newGlobalCondition: Conditions = {
-          id: 'global',
-          name: 'Condition pour tous les gains',
-          value: hasMinimumPurchase ? `Achat minimum de ${minimumAmount}€` : 'Aucune condition',
-        };
-        setValue('configuration.retrievalConditions', [...conditions, newGlobalCondition]);
-      }
+  const openAddModal = (giftName?: string) => {
+    if (giftName) {
+      setSelectedGift(giftName);
     } else {
-      // Supprimer la condition globale
-      const updatedConditions = conditions.filter((c: any) => c.id !== 'global');
-      setValue('configuration.retrievalConditions', updatedConditions);
+      setSelectedGift('');
     }
-  }, [allGifts, hasMinimumPurchase, minimumAmount, conditions, setValue]);
-
-  // Mettre à jour la condition globale quand le montant change
-  useEffect(() => {
-    if (allGifts) {
-      const globalCondition = conditions.find((c: any) => c.id === 'global');
-      if (globalCondition) {
-        const updatedCondition = {
-          ...globalCondition,
-          value: hasMinimumPurchase ? `Achat minimum de ${minimumAmount}€` : 'Aucune condition',
-        };
-        const updatedConditions = conditions.map((c: any) => 
-          c.id === 'global' ? updatedCondition : c
-        );
-        setValue('configuration.retrievalConditions', updatedConditions);
-      }
-    }
-  }, [hasMinimumPurchase, minimumAmount]);
-
-  const updateConditionValue = (conditionId: string, value: string) => {
-    const updatedConditions = conditions.map((condition: any) => 
-      condition.id === conditionId ? { ...condition, value } : condition
-    );
-    setValue('configuration.retrievalConditions', updatedConditions);
+    setConditionType('none');
+    setMinAmount('');
+    setEditingCondition(null);
+    setIsModalOpen(true);
   };
 
-  const addCustomCondition = () => {
-    const newCondition: Conditions = {
-      id: `custom_${Date.now()}`,
-      name: 'Condition personnalisée',
-      value: '',
-    };
-    append(newCondition);
+  const openEditModal = (condition: GiftCondition) => {
+    setSelectedGift(condition.giftName);
+    setConditionType(condition.condition === 'Aucune' ? 'none' : 'minimum');
+    setMinAmount(condition.minAmount?.toString() || '');
+    setEditingCondition(condition);
+    setIsModalOpen(true);
   };
 
-  const onSubmit = (data: Campaign) => {
-    try {
-      const updatedData = {
-        ...data,
-        updated_at: new Date().toISOString(),
-        updated_by: 'user@example.com',
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingCondition(null);
+  };
+
+  const saveCondition = () => {
+    const conditionText = conditionType === 'none' ? 'Aucune' : `Achat minimum de ${minAmount}€`;
+    
+    if (editingCondition) {
+      // Modifier condition existante
+      const updatedConditions = giftConditions.map(c =>
+        c.id === editingCondition.id
+          ? {
+              ...c,
+              condition: conditionText,
+              minAmount: conditionType === 'minimum' ? parseFloat(minAmount) : undefined,
+            }
+          : c
+      );
+      setGiftConditions(updatedConditions);
+    } else {
+      // Ajouter nouvelle condition
+      const newCondition: GiftCondition = {
+        id: Date.now().toString(),
+        giftName: selectedGift,
+        condition: conditionText,
+        minAmount: conditionType === 'minimum' ? parseFloat(minAmount) : undefined,
       };
-      
-      localStorage.setItem('campaign', JSON.stringify(updatedData));
-      setIsModified(false);
-      setLastSaved(new Date().toLocaleString());
-      
-      // Feedback visuel amélioré
-      alert(`✅ Campagne "${data.label}" sauvegardée avec succès !`);
-      console.log('✅ Données sauvegardées:', updatedData);
-    } catch (error) {
-      console.error('❌ Erreur lors de la sauvegarde:', error);
-      alert('❌ Erreur lors de la sauvegarde. Veuillez réessayer.');
+      setGiftConditions([...giftConditions, newCondition]);
     }
+    closeModal();
+  };
+
+  const deleteCondition = (id: string) => {
+    setGiftConditions(giftConditions.filter(c => c.id !== id));
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={3}>
+    <Paper sx={{ p: isMobile ? 2 : 3 }}>
+      <Stack spacing={isMobile ? 2 : 3}>
         {/* En-tête avec bouton d'expansion */}
         <Box 
           sx={{ 
@@ -184,6 +151,7 @@ const RetrievalConditionsSection: React.FC = () => {
             justifyContent: 'space-between', 
             alignItems: 'flex-start',
             cursor: 'pointer',
+            gap: 1,
           }}
           onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -197,252 +165,494 @@ const RetrievalConditionsSection: React.FC = () => {
               }}
             />
             <Box sx={{ flex: 1, py: 0.5 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
-                DÉFINISSEZ LES CONDITIONS POUR RÉCUPÉRER LES CADEAUX
+              <Typography 
+                variant="h6" 
+                gutterBottom 
+                sx={{ 
+                  fontWeight: 600, 
+                  color: 'text.primary', 
+                  mb: 1,
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
+                }}
+              >
+                CONDITIONS DE RÉCUPÉRATION
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Paramétrez les critères d'achat et les conditions récupération pour renforcer l'impact de votre campagne avec vos cadeaux.
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{
+                  fontSize: isMobile ? '0.9rem' : '1rem',
+                  lineHeight: 1.4,
+                }}
+              >
+                Définissez les conditions que vos clients doivent remplir pour récupérer leurs gains. Configurez les montants minimums d'achat et autres exigences.
               </Typography>
             </Box>
           </Box>
-          <IconButton sx={{ mt: 0.5 }}>
+          <IconButton sx={{ mt: 0.5 }} size={isMobile ? 'small' : 'medium'}>
             {isExpanded ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
         </Box>
 
-        {lastSaved && (
-          <Box sx={{ p: 1, bgcolor: 'success.50', textAlign: 'center' }}>
-            <Typography variant="caption" color="success.dark">
-              Dernière sauvegarde : {lastSaved}
-              {isModified && ' (modifications non sauvegardées)'}
-            </Typography>
-          </Box>
-        )}
-
         <Collapse in={isExpanded}>
-          <Stack spacing={3}>
-            {/* Conditions personnalisées par gain */}
-            <Box>
-              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <GpsFixed sx={{ fontSize: '1rem', color: 'primary.main' }} />
-                Conditions par gain
-              </Box>
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Vous pouvez définir des conditions spécifiques de récupération pour chaque gain gagné.
-              </Typography>
+          <Stack spacing={{
+            xs: 2,      // Mobile
+            sm: 2.5,    // Tablette
+            md: 3,      // Desktop responsive
+            lg: 3.5,    // Large
+            xl: 4,      // Extra large
+          }}>
+            
+            {/* Container pour les switches */}
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              width: '40%',
+              alignSelf: 'flex-start',
+            }}>
               
-              {/* Switch pour tous les gains */}
-              <Box sx={{ mb: 3 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={allGifts}
-                      onChange={(e: any) => setAllGifts(e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        Pour tous les gains
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Appliquer la même condition à tous les gains
-                      </Typography>
-                    </Box>
-                  }
-                />
-
-                {/* Condition d'achat minimal */}
-                <Collapse in={allGifts}>
-                  <Box sx={{ mt: 2, ml: 4 }}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={hasMinimumPurchase}
-                          onChange={(e: any) => setHasMinimumPurchase(e.target.checked)}
-                          color="primary"
-                        />
-                      }
-                      label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <ShoppingCart fontSize="small" />
-                          <Typography variant="body2">
-                            Sous condition d'achat minimal
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                    
-                    <Collapse in={hasMinimumPurchase}>
-                      <Box sx={{ mt: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                          <TextField
-                            type="number"
-                            value={minimumAmount}
-                            onChange={(e: any) => setMinimumAmount(Number(e.target.value))}
-                            size="small"
-                            sx={{ width: 120 }}
-                            inputProps={{ min: 0, step: 0.5 }}
-                          />
-                          <Typography variant="body2">€ minimum d'achat</Typography>
-                        </Box>
-                        <Box sx={{ mt: 1.5 }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            Montant à atteindre
-                          </Typography>
-                          <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>
-                            Ex : 10€ d'achat minimum pour récupérer le gain
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Collapse>
+              {/* Configuration sans condition */}
+            <Box sx={{ width: '100%' }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={forAllWins}
+                    onChange={(e) => setForAllWins(e.target.checked)}
+                    size={isMobile ? 'small' : 'medium'}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography 
+                      sx={{ 
+                        fontSize: isMobile ? '0.95rem' : '1rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Pas de condition
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{
+                        fontSize: isMobile ? '0.8rem' : '0.85rem',
+                        mt: 0.5,
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      Les clients peuvent récupérer leurs gain sans aucun achat.
+                    </Typography>
                   </Box>
-                </Collapse>
-              </Box>
+                }
+                labelPlacement="end"
+                sx={{ 
+                  flexDirection: 'row-reverse',
+                  justifyContent: 'flex-start',
+                  ml: 0,
+                  mr: 0,
+                  width: '100%',
+                  '& .MuiFormControlLabel-label': {
+                    ml: 1,
+                  },
+                }}
+              />
             </Box>
 
-            {/* Tableau des conditions */}
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Conditions personnalisées par gain
-                </Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<Add />}
-                  onClick={addCustomCondition}
-                >
-                  Ajouter condition
-                </Button>
-              </Box>
+            {/* Configuration condition d'achat - au même niveau */}
+            <Box sx={{ width: '100%' }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={requiresPurchase}
+                    onChange={(e) => setRequiresPurchase(e.target.checked)}
+                    size={isMobile ? 'small' : 'medium'}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography 
+                      sx={{ 
+                        fontSize: isMobile ? '0.9rem' : '0.95rem',
+                        color: 'text.primary',
+                      }}
+                    >
+                      Sous condition d'achat minimal
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{
+                        fontSize: isMobile ? '0.8rem' : '0.85rem',
+                        mt: 0.5,
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      Exigez un montant minimum d'achat en boutique pour permettre la récupération du gain.
+                    </Typography>
+                  </Box>
+                }
+                labelPlacement="end"
+                sx={{ 
+                  flexDirection: 'row-reverse',
+                  justifyContent: 'flex-start',
+                  ml: 0,
+                  mr: 0,
+                  width: '100%',
+                  '& .MuiFormControlLabel-label': {
+                    ml: 1,
+                  },
+                }}
+              />
+            </Box>
+            
+            </Box>
 
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Gain</TableCell>
-                      <TableCell>Condition</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {conditions.map((condition: any, index: number) => {
-                      const relatedGift = gifts.find((gift: any) => gift.id === condition.id);
-                      const isGlobalCondition = condition.id === 'global';
-                      const isCustomCondition = condition.id.startsWith('custom_');
+            {/* Titre de la section tableau */}
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 600, 
+                fontSize: isMobile ? '1rem' : '1.1rem',
+                color: 'text.primary',
+                mt: {
+                  xs: 2,      // Mobile
+                  sm: 2.5,    // Tablette
+                  md: 3,      // Desktop
+                  lg: 3.5,    // Large
+                  xl: 4,      // Extra large
+                },
+              }}
+            >
+              Conditions personnalisées par gain
+            </Typography>
+            
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{
+                fontSize: isMobile ? '0.85rem' : '0.9rem',
+                mb: {
+                  xs: 1.5,    // Mobile
+                  sm: 2,      // Tablette
+                  md: 2.5,    // Desktop
+                  lg: 2.5,    // Large
+                  xl: 3,      // Extra large
+                },
+              }}
+            >
+              Vous pouvez définir une condition spécifique sur un ou plusieurs gains.
+            </Typography>
+
+            {/* Tableau des conditions avec bordures */}
+            <TableContainer 
+              sx={{ 
+                overflowX: 'auto',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                '&::-webkit-scrollbar': {
+                  height: 6,
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: '#f1f1f1',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: '#888',
+                  borderRadius: 3,
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  backgroundColor: '#555',
+                },
+              }}
+            >
+              <Table sx={{ minWidth: isMobile ? 500 : 'auto' }}>
+                <TableHead sx={{ bgcolor: 'grey.50' }}>
+                  <TableRow>
+                    <TableCell sx={{ 
+                      fontSize: isMobile ? '0.85rem' : '1rem',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                      py: isMobile ? 1.5 : 2,
+                      borderRight: '1px solid',
+                      borderRightColor: 'divider',
+                    }}>
+                      Gain
+                    </TableCell>
+                    <TableCell sx={{ 
+                      fontSize: isMobile ? '0.85rem' : '1rem',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                      py: isMobile ? 1.5 : 2,
+                      borderRight: '1px solid',
+                      borderRightColor: 'divider',
+                    }}>
+                      Condition
+                      <Tooltip 
+                        title="Définissez les conditions que vos clients doivent remplir pour récupérer leurs gains."
+                        arrow
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              bgcolor: '#000000',
+                              color: '#ffffff',
+                              fontSize: '0.8rem',
+                              maxWidth: 300,
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              '& .MuiTooltip-arrow': {
+                                color: '#000000',
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <IconButton 
+                          size="small" 
+                          sx={{ 
+                            ml: 1,
+                            color: '#2D5BFF',
+                            '&:hover': {
+                              bgcolor: 'rgba(45, 91, 255, 0.08)',
+                            },
+                          }}
+                        >
+                          <Info fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell 
+                      align="center"
+                      sx={{ 
+                        fontSize: isMobile ? '0.85rem' : '1rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                        py: isMobile ? 1.5 : 2,
+                      }}
+                    >
+                      Action
+                      <Tooltip 
+                        title="Actions disponibles pour gérer et modifier les conditions de récupération des gains."
+                        arrow
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              bgcolor: '#000000',
+                              color: '#ffffff',
+                              fontSize: '0.8rem',
+                              maxWidth: 300,
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              '& .MuiTooltip-arrow': {
+                                color: '#000000',
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <IconButton 
+                          size="small" 
+                          sx={{ 
+                            ml: 1,
+                            color: '#2D5BFF',
+                            '&:hover': {
+                              bgcolor: 'rgba(45, 91, 255, 0.08)',
+                            },
+                          }}
+                        >
+                          <Info fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {giftConditions.map((condition) => (
+                    <TableRow key={condition.id} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
+                      <TableCell sx={{ 
+                        py: isMobile ? 1.5 : 2,
+                        borderRight: '1px solid',
+                        borderRightColor: 'divider',
+                      }}>
+                        <Typography 
+                          variant="body2"
+                          sx={{
+                            fontSize: isMobile ? '0.8rem' : '0.9rem',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {condition.giftName}
+                        </Typography>
+                      </TableCell>
                       
-                      return (
-                        <TableRow key={condition.id}>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              {isGlobalCondition ? (
-                                <>
-                                  <Typography sx={{ fontSize: '1.2rem' }}>🌟</Typography>
-                                  <Box>
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                      Tous les gains
-                                    </Typography>
-                                    <Chip 
-                                      label="Global" 
-                                      size="small" 
-                                      color="primary" 
-                                      variant="outlined"
-                                    />
-                                  </Box>
-                                </>
-                              ) : isCustomCondition ? (
-                                <>
-                                  <Person color="action" />
-                                  <Box>
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                      {condition.name}
-                                    </Typography>
-                                    <Chip 
-                                      label="Personnalisée" 
-                                      size="small" 
-                                      color="secondary" 
-                                      variant="outlined"
-                                    />
-                                  </Box>
-                                </>
-                              ) : relatedGift ? (
-                                <>
-                                  <Typography sx={{ fontSize: '1.2rem' }}>
-                                    {relatedGift.icon}
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                    {relatedGift.name}
-                                  </Typography>
-                                </>
-                              ) : (
-                                <Typography variant="body2" color="text.secondary">
-                                  Gain supprimé
-                                </Typography>
-                              )}
-                            </Box>
-                          </TableCell>
-                          
-                          <TableCell>
-                            <TextField
-                              value={condition.value}
-                              onChange={(e: any) => updateConditionValue(condition.id, e.target.value)}
+                      <TableCell sx={{ 
+                        py: isMobile ? 1.5 : 2,
+                        borderRight: '1px solid',
+                        borderRightColor: 'divider',
+                      }}>
+                        <Typography 
+                          variant="body2"
+                          sx={{
+                            fontSize: isMobile ? '0.8rem' : '0.9rem',
+                            color: condition.condition === 'Aucune' ? 'text.secondary' : 'text.primary',
+                          }}
+                        >
+                          {condition.condition}
+                        </Typography>
+                      </TableCell>
+                      
+                      <TableCell align="center" sx={{ py: isMobile ? 1.5 : 2 }}>
+                        <Stack direction="row" spacing={0.5} justifyContent="center">
+                          {condition.condition === 'Aucune' ? (
+                            <Button
+                              variant="text"
+                              startIcon={<Add />}
+                              onClick={() => openAddModal(condition.giftName)}
+                              color="primary"
                               size="small"
-                              fullWidth
-                              placeholder="Ex: Présenter la carte de fidélité..."
-                              disabled={isGlobalCondition}
-                            />
-                          </TableCell>
-                          
-                          <TableCell>
-                            {(isCustomCondition || (!relatedGift && !isGlobalCondition)) && (
+                              sx={{ textTransform: 'none' }}
+                            >
+                              Ajouter une condition
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                variant="text"
+                                startIcon={<Edit />}
+                                onClick={() => openEditModal(condition)}
+                                color="primary"
+                                size="small"
+                                sx={{ textTransform: 'none' }}
+                              >
+                                Modifier
+                              </Button>
                               <IconButton 
                                 size="small" 
                                 color="error"
-                                onClick={() => remove(index)}
-                                title="Supprimer"
+                                onClick={() => deleteCondition(condition.id)}
+                                sx={{
+                                  padding: isMobile ? '4px' : '6px',
+                                }}
                               >
-                                <Delete />
+                                <Delete fontSize="small" />
                               </IconButton>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    
-                    {conditions.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Aucune condition configurée. Les conditions seront créées automatiquement en fonction de vos gains.
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-
-            {/* Information */}
-                          <Box sx={{ p: 2, bgcolor: 'info.50', borderRadius: 0, border: 'none' }}>
-              <Typography variant="body2" color="info.dark">
-                                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                    <Lightbulb sx={{ fontSize: '1rem', color: 'info.main', mt: 0.25 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Conseil :</strong> Définissez des conditions claires et attrayantes pour encourager
-                    </Typography>
-                  </Box> 
-                vos clients à revenir et à faire des achats supplémentaires. Les conditions peuvent inclure 
-                un montant d'achat minimum, la présentation d'une carte de fidélité, ou toute autre exigence 
-                spécifique à votre établissement.
-              </Typography>
-            </Box>
+                            </>
+                          )}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  
+                  {giftConditions.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{
+                            fontSize: isMobile ? '0.9rem' : '1rem',
+                          }}
+                        >
+                          Aucune condition personnalisée configurée.
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Stack>
         </Collapse>
+
+        {/* Modal d'ajout/édition de condition */}
+        <Dialog 
+          open={isModalOpen} 
+          onClose={closeModal} 
+          maxWidth="sm" 
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              margin: isMobile ? '16px' : '32px',
+              maxHeight: isMobile ? 'calc(100% - 32px)' : 'calc(100% - 64px)',
+            },
+          }}
+        >
+          <DialogTitle sx={{ 
+            fontSize: isMobile ? '1.1rem' : '1.25rem',
+            pb: isMobile ? 1 : 2,
+          }}>
+            {editingCondition ? 'Modifier la condition' : 'Ajouter une condition'}
+          </DialogTitle>
+          <DialogContent sx={{ px: isMobile ? 2 : 3 }}>
+            <Stack spacing={isMobile ? 2 : 3} sx={{ mt: 1 }}>
+              <TextField
+                label="Gain"
+                select
+                value={selectedGift}
+                onChange={(e) => setSelectedGift(e.target.value)}
+                fullWidth
+                size={isMobile ? 'small' : 'medium'}
+                disabled={!!editingCondition}
+              >
+                {availableGifts.map((gift) => (
+                  <MenuItem key={gift.id} value={gift.name}>
+                    {gift.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Type de condition"
+                select
+                value={conditionType}
+                onChange={(e) => setConditionType(e.target.value)}
+                fullWidth
+                size={isMobile ? 'small' : 'medium'}
+              >
+                <MenuItem value="none">Aucune condition</MenuItem>
+                <MenuItem value="minimum">Achat minimum requis</MenuItem>
+              </TextField>
+
+              {conditionType === 'minimum' && (
+                <TextField
+                  label="Montant minimum"
+                  type="number"
+                  value={minAmount}
+                  onChange={(e) => setMinAmount(e.target.value)}
+                  placeholder="Ex: 10"
+                  size={isMobile ? 'small' : 'medium'}
+                  fullWidth
+                  InputProps={{
+                    endAdornment: <Typography variant="body2">€</Typography>
+                  }}
+                />
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ 
+            px: isMobile ? 2 : 3,
+            pb: isMobile ? 2 : 2,
+            gap: 1,
+          }}>
+            <Button 
+              onClick={closeModal} 
+              size={isMobile ? 'small' : 'medium'}
+              sx={{ textTransform: 'none' }}
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={saveCondition} 
+              variant="contained"
+              color="primary"
+              disabled={!selectedGift || (conditionType === 'minimum' && (!minAmount || parseFloat(minAmount) <= 0))}
+              size={isMobile ? 'small' : 'medium'}
+              sx={{ textTransform: 'none' }}
+            >
+              {editingCondition ? 'Modifier' : 'Ajouter'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Stack>
     </Paper>
   );

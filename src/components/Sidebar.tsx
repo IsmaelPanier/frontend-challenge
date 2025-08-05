@@ -12,6 +12,8 @@ import {
   Card,
   CardContent,
   Chip,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Dashboard,
@@ -26,7 +28,14 @@ import {
   Store,
 } from '@mui/icons-material';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onItemClick?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const menuItems = [
     { text: 'Tous les enseignes', icon: <Store />, active: false, badge: null },
     { text: 'Mon tableau de bord', icon: <Dashboard />, active: false, badge: 'à venir' },
@@ -38,32 +47,50 @@ const Sidebar: React.FC = () => {
     { text: 'Mon Centre d\'aide', icon: <Help />, active: false, badge:  'à venir' },
   ];
 
+  const handleItemClick = () => {
+    if (onItemClick) {
+      onItemClick();
+    }
+  };
+
   return (
     <Box
       sx={{
         width: 320,
         minHeight: '100vh',
         bgcolor: 'white',
-        borderRight: '1px solid #e0e0e0',
+        borderRight: isMobile ? 'none' : '1px solid #e0e0e0',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
       }}
     >
       {/* Logo */}
-      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ 
+        p: isMobile ? 2 : 3, 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 2 
+      }}>
         <Avatar
           sx={{
-            width: 40,
-            height: 40,
+            width: isMobile ? 36 : 40,
+            height: isMobile ? 36 : 40,
             bgcolor: '#6366f1',
-            fontSize: '16px',
+            fontSize: isMobile ? '14px' : '16px',
             fontWeight: 'bold',
           }}
         >
           SM
         </Avatar>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#1a1a1a',
+            fontSize: isMobile ? '1.3rem' : '1.5rem',
+          }}
+        >
           JEUX
         </Typography>
       </Box>
@@ -77,6 +104,7 @@ const Sidebar: React.FC = () => {
             <ListItem
               key={index}
               component="button"
+              onClick={handleItemClick}
               sx={{
                 mb: 0.5,
                 borderRadius: 1,
@@ -94,7 +122,7 @@ const Sidebar: React.FC = () => {
               <ListItemIcon
                 sx={{
                   color: item.active ? '#1976d2' : '#666666',
-                  minWidth: 40,
+                  minWidth: isMobile ? 36 : 40,
                 }}
               >
                 {item.icon}
@@ -102,7 +130,7 @@ const Sidebar: React.FC = () => {
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
-                  fontSize: '16px',
+                  fontSize: isMobile ? '14px' : '16px',
                   fontWeight: item.active ? 600 : 400,
                 }}
               />
@@ -111,8 +139,8 @@ const Sidebar: React.FC = () => {
                   label={item.badge}
                   size="small"
                   sx={{
-                    fontSize: '11px',
-                    height: '20px',
+                    fontSize: isMobile ? '10px' : '11px',
+                    height: isMobile ? '18px' : '20px',
                     bgcolor: '#e3f2fd',
                     color: '#1976d2',
                     '& .MuiChip-label': {
@@ -126,14 +154,14 @@ const Sidebar: React.FC = () => {
         </List>
 
                  {/* Promotional Card */}
-         <Box sx={{ mx: 3, my: 4 }}>
+         <Box sx={{ mx: isMobile ? 2 : 3, my: isMobile ? 3 : 4 }}>
            <Card sx={{ bgcolor: '#f0f4ff', border: '1px solid #e3f2fd' }}>
-             <CardContent sx={{ p: 3 }}>
+             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                  <Box
                    sx={{
-                     width: 48,
-                     height: 48,
+                     width: isMobile ? 40 : 48,
+                     height: isMobile ? 40 : 48,
                      bgcolor: '#ff6b6b',
                      borderRadius: '50%',
                      display: 'flex',
@@ -142,12 +170,15 @@ const Sidebar: React.FC = () => {
                      mr: 1.5,
                    }}
                  >
-                   <Typography sx={{ color: 'white', fontSize: '24px' }}>🎯</Typography>
+                   <Typography sx={{ 
+                     color: 'white', 
+                     fontSize: isMobile ? '20px' : '24px' 
+                   }}>🎯</Typography>
                  </Box>
                  <Box
                    sx={{
-                     width: 36,
-                     height: 36,
+                     width: isMobile ? 30 : 36,
+                     height: isMobile ? 30 : 36,
                      bgcolor: '#4ecdc4',
                      borderRadius: '50%',
                      display: 'flex',
@@ -155,13 +186,30 @@ const Sidebar: React.FC = () => {
                      justifyContent: 'center',
                    }}
                  >
-                   <Typography sx={{ color: 'white', fontSize: '18px' }}>👤</Typography>
+                   <Typography sx={{ 
+                     color: 'white', 
+                     fontSize: isMobile ? '16px' : '18px' 
+                   }}>👤</Typography>
                  </Box>
                </Box>
-               <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, fontSize: '14px' }}>
+               <Typography 
+                 variant="body2" 
+                 sx={{ 
+                   fontWeight: 600, 
+                   mb: 1, 
+                   fontSize: isMobile ? '13px' : '14px' 
+                 }}
+               >
                  Commandez Vos Flyers Personnalisés
                </Typography>
-               <Typography variant="caption" sx={{ color: '#666', fontSize: '13px', lineHeight: 1.4 }}>
+               <Typography 
+                 variant="caption" 
+                 sx={{ 
+                   color: '#666', 
+                   fontSize: isMobile ? '12px' : '13px', 
+                   lineHeight: 1.4 
+                 }}
+               >
                  Personnalisez et commandez vos PUV pour toucher efficacement votre clientèle
                </Typography>
                <Button
@@ -170,8 +218,8 @@ const Sidebar: React.FC = () => {
                  sx={{
                    mt: 2,
                    bgcolor: '#6366f1',
-                   fontSize: '13px',
-                   py: 1,
+                   fontSize: isMobile ? '12px' : '13px',
+                   py: isMobile ? 0.8 : 1,
                    textTransform: 'none',
                    fontWeight: 600,
                  }}
@@ -184,11 +232,12 @@ const Sidebar: React.FC = () => {
       </Box>
 
       {/* Bottom Section */}
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: isMobile ? 1.5 : 2 }}>
         <Divider sx={{ mb: 2 }} />
         <List sx={{ py: 0 }}>
           <ListItem
             component="button"
+            onClick={handleItemClick}
             sx={{
               mb: 1,
               borderRadius: 1,
@@ -199,19 +248,20 @@ const Sidebar: React.FC = () => {
               textAlign: 'left',
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40 }}>
+            <ListItemIcon sx={{ minWidth: isMobile ? 36 : 40 }}>
               <AccountCircle sx={{ color: '#666666' }} />
             </ListItemIcon>
                          <ListItemText
                primary="Compte"
                primaryTypographyProps={{
-                 fontSize: '16px',
+                 fontSize: isMobile ? '14px' : '16px',
                  color: '#666666',
                }}
              />
            </ListItem>
            <ListItem
              component="button"
+             onClick={handleItemClick}
              sx={{
                borderRadius: 1,
                '&:hover': { bgcolor: '#f5f5f5' },
@@ -221,13 +271,13 @@ const Sidebar: React.FC = () => {
                textAlign: 'left',
              }}
            >
-             <ListItemIcon sx={{ minWidth: 40 }}>
+             <ListItemIcon sx={{ minWidth: isMobile ? 36 : 40 }}>
                <Logout sx={{ color: '#666666' }} />
              </ListItemIcon>
              <ListItemText
                primary="Déconnexion"
                primaryTypographyProps={{
-                 fontSize: '16px',
+                 fontSize: isMobile ? '14px' : '16px',
                  color: '#666666',
                }}
              />

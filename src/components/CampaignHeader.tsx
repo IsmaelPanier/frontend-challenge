@@ -2,13 +2,18 @@ import React from 'react';
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   Box,
   Stack,
+  useMediaQuery,
+  useTheme,
+  IconButton,
 } from '@mui/material';
 import {
   QrCode2,
+  Save,
+  VpnKey,
+  MoreHoriz,
 } from '@mui/icons-material';
 
 interface CampaignHeaderProps {
@@ -17,210 +22,228 @@ interface CampaignHeaderProps {
 }
 
 const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isVerySmallMobile = useMediaQuery(theme.breakpoints.down(400));
+
+
+  // Calcul responsive des tailles
+  const getTitleSize = () => {
+    if (isVerySmallMobile) return '1rem';
+    if (isSmallMobile) return '1.2rem';
+    if (isMobile) return '1.5rem';
+    return '2rem';
+  };
+
+  const getEllipseStyles = () => {
+    return {
+      position: 'absolute',
+      top: '0.1em',
+      left: '-0.5em',
+      width: '110%', // Largeur fixe pour bien épouser le texte
+      height: '1.8em',
+      border: `${isMobile ? '2px' : '3px'} solid #2D5BFF`,
+      borderRadius: '50%',
+      transform: 'rotate(-5deg)',
+      zIndex: 1,
+      pointerEvents: 'none',
+    };
+  };
+
+  const getStarsStyles = () => {
+    return {
+      position: 'absolute',
+      right: '-1em',
+      bottom: '-0.2em', // Position corrigée comme dans le CSS
+      fontSize: isVerySmallMobile ? '0.6rem' : isMobile ? '0.8rem' : '20px', // Taille fixe sur desktop
+      color: 'orange',
+      display: 'block',
+      zIndex: 2,
+    };
+  };
+
   return (
     <AppBar position="sticky" color="default" elevation={1}>
-      <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
-        {/* Logo et titre */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box
-            sx={{
-              position: 'relative',
-              fontFamily: 'Arial, sans-serif',
-              fontWeight: 'bold',
-              fontSize: '2rem',
-              color: '#2D5BFF',
-            }}
-          >
-            {/* Ellipse */}
+      <Toolbar sx={{ 
+        justifyContent: 'space-between', 
+        py: isMobile ? 0.5 : 1,
+        minHeight: isMobile ? 56 : 64,
+        px: isMobile ? 1 : 3,
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: isMobile ? 1 : 0,
+      }}>
+        {/* Ligne principale mobile/desktop */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          width: '100%',
+        }}>
+          {/* Logo et titre responsive */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: isMobile ? 1 : 2,
+            overflow: 'visible',
+          }}>
             <Box
-              sx={{
-                position: 'absolute',
-                top: '0.1em',
-                left: '-0.5em',
-                width: '100%',
-                height: '1.8em',
-                border: '3px solid #2D5BFF',
-                borderRadius: '50%',
-                transform: 'rotate(-5deg)',
-                zIndex: 1,
-                pointerEvents: 'none',
-              }}
-            />
-            
-            {/* Texte */}
-            <Box
-              component="span"
               sx={{
                 position: 'relative',
-                zIndex: 2,
+                fontFamily: 'Arial, sans-serif',
+                fontWeight: 'bold',
+                fontSize: getTitleSize(),
+                color: '#2D5BFF',
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+                minWidth: 'fit-content',
+                pr: isVerySmallMobile ? '1.5em' : '2em', // Espace pour les étoiles ajusté
               }}
             >
-              Ma Campagne
-            </Box>
-            
-            {/* Étoiles */}
-            <Box
-              sx={{
-                position: 'absolute',
-                right: '-2em',
-                bottom: '-1.2em',
-                fontSize: '1.25rem',
-                color: 'orange',
-              }}
-            >
-              ✻ ✻ ✻
+              {/* Ellipse responsive */}
+              <Box sx={getEllipseStyles()} />
+              
+              {/* Texte */}
+              <Box
+                component="span"
+                sx={{
+                  position: 'relative',
+                  zIndex: 2,
+                  display: 'inline-block',
+                }}
+              >
+                Ma Campagne
+              </Box>
+              
+              {/* Étoiles avec caractères corrects */}
+              <Box sx={getStarsStyles()}>
+                ✻ ✻ ✻
+              </Box>
             </Box>
           </Box>
+
+          {/* Boutons principaux - toujours visibles sur desktop */}
+          {!isMobile && (
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="outlined"
+                onClick={() => onOpenModal('pin')}
+                color="primary"
+                sx={{ 
+                  minWidth: 140,
+                  borderLeft: '4px solid',
+                  borderLeftColor: 'primary.main',
+                  textTransform: 'none',
+                }}
+              >
+                Mon Code PIN
+              </Button>
+
+              <Button
+                variant="outlined"
+                startIcon={<QrCode2 />}
+                onClick={() => onOpenModal('qr')}
+                color="warning"
+                sx={{ 
+                  minWidth: 140,
+                  textTransform: 'none',
+                }}
+              >
+                QR Code
+              </Button>
+              
+              <Button
+                variant="contained"
+                onClick={onSave}
+                color="primary"
+                sx={{ 
+                  minWidth: 120,
+                  textTransform: 'none',
+                }}
+              >
+                Sauvegarder
+              </Button>
+
+              <Button
+                variant="text"
+                startIcon={<MoreHoriz />}
+                onClick={() => onOpenModal('more')}
+                sx={{ 
+                  minWidth: 80,
+                  textTransform: 'none',
+                  color: 'text.secondary',
+                }}
+              >
+                Plus
+              </Button>
+            </Stack>
+          )}
+
+          {/* Boutons responsives mobile */}
+          {isMobile && (
+            <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
+              <IconButton
+                onClick={() => onOpenModal('pin')}
+                color="primary"
+                sx={{ 
+                  width: 42,
+                  height: 42,
+                  bgcolor: 'background.paper',
+                  border: '2px solid',
+                  borderColor: 'primary.main',
+                }}
+              >
+                <VpnKey fontSize="small" />
+              </IconButton>
+
+              <IconButton
+                onClick={() => onOpenModal('qr')}
+                color="warning"
+                sx={{ 
+                  width: 42,
+                  height: 42,
+                  bgcolor: 'background.paper',
+                  border: '2px solid',
+                  borderColor: 'warning.main',
+                }}
+              >
+                <QrCode2 fontSize="small" />
+              </IconButton>
+              
+              <IconButton
+                onClick={onSave}
+                color="primary"
+                sx={{ 
+                  width: 42,
+                  height: 42,
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                }}
+              >
+                <Save fontSize="small" />
+              </IconButton>
+              
+              <IconButton
+                onClick={() => onOpenModal('more')}
+                sx={{ 
+                  width: 42,
+                  height: 42,
+                  bgcolor: 'background.paper',
+                  color: 'text.secondary',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <MoreHoriz fontSize="small" />
+              </IconButton>
+            </Stack>
+          )}
         </Box>
-
-        {/* Boutons de navigation */}
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Button
-            variant="contained"
-            onClick={() => onOpenModal('pin')}
-            sx={{ 
-              fontSize: '1rem', 
-              px: 4,
-              py: 1.2,
-              minWidth: 140,
-              bgcolor: 'white',
-              color: '#1a1a1a',
-              border: 'none',
-              borderLeft: '4px solid #6366f1',
-              borderRadius: 0,
-              whiteSpace: 'nowrap',
-              '&:hover': {
-                bgcolor: '#f5f5f5',
-                borderLeft: '4px solid #6366f1',
-              },
-            }}
-          >
-            Mon Code PIN
-          </Button>
-          
-          <Button
-            variant="contained"
-            startIcon={<QrCode2 />}
-            onClick={() => onOpenModal('qr')}
-            sx={{ 
-              fontSize: '1rem', 
-              px: 4,
-              py: 1.2,
-              minWidth: 120,
-              bgcolor: '#ff9800',
-              color: 'white',
-              borderRadius: 0,
-              '&:hover': {
-                bgcolor: '#f57c00',
-              },
-            }}
-          >
-            QR Code
-          </Button>
-
-          <Button
-            variant="contained"
-            onClick={onSave}
-            sx={{
-              bgcolor: '#1976d2',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '1rem',
-              px: 4,
-              py: 1.2,
-              minWidth: 160,
-              borderRadius: 0,
-              '&:hover': {
-                bgcolor: '#1565c0',
-              },
-            }}
-          >
-            SAUVEGARDER
-          </Button>
-
-          <Button
-            variant="contained"
-            onClick={() => onOpenModal('more')}
-            sx={{ 
-              width: 48,
-              height: 48,
-              minWidth: 48,
-              background: 'linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%)',
-              border: '2px solid #e6e9ff',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 0.5,
-              cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(79, 70, 229, 0.08)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #f0f4ff 0%, #dde4ff 100%)',
-                borderColor: '#d4deff',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 16px rgba(79, 70, 229, 0.12)',
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-                boxShadow: '0 2px 8px rgba(79, 70, 229, 0.08)',
-              },
-            }}
-          >
-            <Box 
-              sx={{ 
-                width: 6, 
-                height: 6, 
-                borderRadius: '50%', 
-                bgcolor: '#4f46e5',
-                transition: 'all 0.3s ease',
-                animation: 'pulse 2s infinite',
-                '@keyframes pulse': {
-                  '0%': { transform: 'scale(1)', opacity: 1 },
-                  '50%': { transform: 'scale(1.1)', opacity: 0.8 },
-                  '100%': { transform: 'scale(1)', opacity: 1 },
-                },
-              }} 
-            />
-            <Box 
-              sx={{ 
-                width: 6, 
-                height: 6, 
-                borderRadius: '50%', 
-                bgcolor: '#4f46e5',
-                transition: 'all 0.3s ease',
-                animation: 'pulse 2s infinite',
-                animationDelay: '0.3s',
-                '@keyframes pulse': {
-                  '0%': { transform: 'scale(1)', opacity: 1 },
-                  '50%': { transform: 'scale(1.1)', opacity: 0.8 },
-                  '100%': { transform: 'scale(1)', opacity: 1 },
-                },
-              }} 
-            />
-            <Box 
-              sx={{ 
-                width: 6, 
-                height: 6, 
-                borderRadius: '50%', 
-                bgcolor: '#4f46e5',
-                transition: 'all 0.3s ease',
-                animation: 'pulse 2s infinite',
-                animationDelay: '0.6s',
-                '@keyframes pulse': {
-                  '0%': { transform: 'scale(1)', opacity: 1 },
-                  '50%': { transform: 'scale(1.1)', opacity: 0.8 },
-                  '100%': { transform: 'scale(1)', opacity: 1 },
-                },
-              }} 
-            />
-          </Button>
-        </Stack>
       </Toolbar>
-
-
     </AppBar>
   );
 };

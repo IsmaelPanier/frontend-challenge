@@ -15,20 +15,33 @@ import {
   TableRow,
   Alert,
   Button,
+  useMediaQuery,
+  useTheme,
+  Collapse,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+
+  Card,
+  CardContent,
 } from '@mui/material';
 import {
   DragIndicator,
   Delete,
   Edit,
-  Add,
+
   Google,
   Instagram,
   Facebook,
   VideoLibrary,
   Warning,
   CheckCircle,
+  ExpandMore,
+  ExpandLess,
+  ControlPoint,
 } from '@mui/icons-material';
-import type { Action, ActionType, Campaign } from '../../doc/CampaignType';
+import type { Action, ActionType, Campaign } from '../types/campaign';
 
 const actionTypeConfig = {
   GOOGLE_REVIEW: {
@@ -60,7 +73,13 @@ const ActionsSection: React.FC = () => {
     name: 'configuration.actions',
   });
   
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const actions = watch('configuration.actions') || [];
 
   // Vérifier les actions en double
@@ -69,19 +88,33 @@ const ActionsSection: React.FC = () => {
   );
 
   const handleDragStart = (index: number) => {
-    setDraggedIndex(index);
+    if (!isMobile) {
+      setDraggedIndex(index);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+    if (!isMobile) {
+      e.preventDefault();
+    }
   };
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== dropIndex) {
-      move(draggedIndex, dropIndex);
+    if (!isMobile) {
+      e.preventDefault();
+      if (draggedIndex !== null && draggedIndex !== dropIndex) {
+        move(draggedIndex, dropIndex);
+      }
+      setDraggedIndex(null);
     }
-    setDraggedIndex(null);
+  };
+
+  const openActionModal = () => {
+    setIsActionModalOpen(true);
+  };
+
+  const closeActionModal = () => {
+    setIsActionModalOpen(false);
   };
 
   const addAction = (type: ActionType) => {
@@ -92,182 +125,420 @@ const ActionsSection: React.FC = () => {
       type,
     };
     append(newAction);
+    closeActionModal();
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={3}>
-        {/* En-tête de section */}
-        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 2 }}>
-          <Box
-            sx={{
-              width: 8,
-              bgcolor: 'primary.main',
-              flexShrink: 0,
-              minHeight: '100%'
-            }}
-          />
-          <Box sx={{ flex: 1, py: 0.5 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
-              ORGANISEZ VOS ACTIONS
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Définissez l'ordre et les actions à réaliser par vos clients pour maintenir l'engagement.
-            </Typography>
+    <Paper sx={{ p: isMobile ? 2 : 3 }}>
+      <Stack spacing={isMobile ? 2 : 3}>
+        {/* En-tête avec bouton d'expansion */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'flex-start',
+            cursor: 'pointer',
+            gap: 1,
+          }}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 2, flex: 1 }}>
+            <Box
+              sx={{
+                width: 8,
+                bgcolor: 'primary.main',
+                flexShrink: 0,
+                minHeight: '100%'
+              }}
+            />
+            <Box sx={{ flex: 1, py: 0.5 }}>
+              <Typography 
+                variant="h6" 
+                gutterBottom 
+                sx={{ 
+                  fontWeight: 600, 
+                  color: 'text.primary', 
+                  mb: 1,
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
+                }}
+              >
+                ORGANISEZ VOS ACTIONS
+              </Typography>
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{
+                  fontSize: isMobile ? '0.9rem' : '1rem',
+                  lineHeight: 1.4,
+                }}
+              >
+                Définissez l'ordre et les actions à réaliser par vos clients pour maintenir l'engagement.
+              </Typography>
+            </Box>
           </Box>
+          <IconButton sx={{ mt: 0.5 }} size={isMobile ? 'small' : 'medium'}>
+            {isExpanded ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
         </Box>
 
-        {/* Alertes pour actions en double */}
-        {duplicateActions.length > 0 && (
-          <Alert severity="warning" icon={<Warning />}>
-            Attention : vous avez des actions en double. Cela peut créer une confusion pour vos clients.
-          </Alert>
-        )}
+        <Collapse in={isExpanded}>
+          <Stack spacing={isMobile ? 2 : 3}>
+            {/* Alertes pour actions en double */}
+            {duplicateActions.length > 0 && (
+              <Alert severity="warning" icon={<Warning />} sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                Attention : vous avez des actions en double. Cela peut créer une confusion pour vos clients.
+              </Alert>
+            )}
 
-        {/* Boutons d'ajout d'actions */}
-        <Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => addAction('GOOGLE_REVIEW')}
-            sx={{ 
-              bgcolor: 'primary.main',
-              color: 'white',
-              fontWeight: 600,
-              px: 3,
-              py: 1.5,
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            Ajouter une action
-          </Button>
-        </Box>
+            {/* Boutons d'ajout d'actions */}
+            <Box>
+              <Button
+                variant="contained"
+                startIcon={<ControlPoint />}
+                onClick={openActionModal}
+                color="primary"
+                sx={{ textTransform: 'none' }}
+              >
+                Ajouter une action
+              </Button>
+            </Box>
 
-        {/* Tableau des actions */}
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell width="50">Ordre</TableCell>
-                <TableCell>Action</TableCell>
-                <TableCell>Cible</TableCell>
-                <TableCell width="100">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {fields.map((field, index) => {
-                const action = actions[index];
-                const config = actionTypeConfig[action.type];
-                
-                return (
-                  <TableRow
-                    key={field.id}
-                    draggable
-                    onDragStart={() => handleDragStart(index)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, index)}
-                    sx={{
-                      cursor: 'grab',
-                      '&:active': { cursor: 'grabbing' },
-                      opacity: draggedIndex === index ? 0.5 : 1,
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <DragIndicator color="action" />
-                        <Typography variant="body2">{index + 1}</Typography>
-                      </Box>
+            {/* Tableau des actions */}
+            <TableContainer 
+              sx={{ 
+                overflowX: 'auto',
+                '&::-webkit-scrollbar': {
+                  height: 6,
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: '#f1f1f1',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: '#888',
+                  borderRadius: 3,
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  backgroundColor: '#555',
+                },
+              }}
+            >
+              <Table sx={{ minWidth: isMobile ? 500 : 'auto' }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell 
+                      width="50"
+                      sx={{ 
+                        fontSize: isMobile ? '0.85rem' : '1rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Ordre
                     </TableCell>
-                    
-                    <TableCell>
-                      <Chip
-                        icon={config.icon}
-                        label={config.label}
-                        size="small"
-                        sx={{
-                          bgcolor: `${config.color}15`,
-                          color: config.color,
-                          border: 'none',
-                        }}
-                      />
+                    <TableCell 
+                      sx={{ 
+                        fontSize: isMobile ? '0.85rem' : '1rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Action
                     </TableCell>
-                    
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {action.target}
-                      </Typography>
-                      {action.type === 'GOOGLE_REVIEW' && (
-                        <Chip 
-                          label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <CheckCircle sx={{ fontSize: '0.875rem' }} />
-                      vérifié
-                    </Box>
-                  } 
-                          size="small" 
-                          color="success" 
-                          variant="outlined"
-                          sx={{ ml: 1 }}
-                        />
-                      )}
+                    <TableCell 
+                      sx={{ 
+                        fontSize: isMobile ? '0.85rem' : '1rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Cible
                     </TableCell>
-                    
-                    <TableCell>
-                      <Stack direction="row" spacing={0.5}>
-                        <IconButton 
-                          size="small" 
-                          disabled={action.type !== 'GOOGLE_REVIEW'}
-                          title="Modifier"
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton 
-                          size="small" 
-                          onClick={() => remove(index)}
-                          color="error"
-                          title="Supprimer"
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Stack>
+                    <TableCell 
+                      width="100"
+                      sx={{ 
+                        fontSize: isMobile ? '0.85rem' : '1rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Actions
                     </TableCell>
                   </TableRow>
-                );
-              })}
-              
-              {fields.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Aucune action configurée. Ajoutez votre première action ci-dessus.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {fields.map((field, index) => {
+                    const action = actions[index];
+                    const config = actionTypeConfig[action.type];
+                    
+                    return (
+                      <TableRow
+                        key={field.id}
+                        draggable={!isMobile}
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, index)}
+                        sx={{
+                          cursor: isMobile ? 'default' : 'grab',
+                          '&:active': { cursor: isMobile ? 'default' : 'grabbing' },
+                          opacity: draggedIndex === index ? 0.5 : 1,
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      >
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {!isMobile && <DragIndicator color="action" />}
+                            <Typography 
+                              variant="body2"
+                              sx={{ fontSize: isMobile ? '0.8rem' : '0.9rem' }}
+                            >
+                              {index + 1}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <Chip
+                            icon={config.icon}
+                            label={config.label}
+                            variant="filled"
+                            size="small"
+                            sx={{
+                              bgcolor: config.color,
+                              color: '#ffffff',
+                              border: 'none !important',
+                              outline: 'none !important',
+                              fontSize: isMobile ? '0.7rem' : '0.8rem',
+                              height: isMobile ? 24 : 28,
+                              fontWeight: 600,
+                              '& .MuiChip-icon': {
+                                fontSize: isMobile ? '0.9rem' : '1rem',
+                                color: '#ffffff',
+                              },
+                            }}
+                          />
+                        </TableCell>
+                        
+                        <TableCell sx={{ maxWidth: isMobile ? 120 : 200 }}>
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{
+                              fontSize: isMobile ? '0.8rem' : '0.9rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {action.target}
+                          </Typography>
+                          {action.type === 'GOOGLE_REVIEW' && (
+                            <Chip 
+                              label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <CheckCircle sx={{ fontSize: isMobile ? '0.7rem' : '0.875rem' }} />
+                          vérifié
+                        </Box>
+                      } 
+                              size="small" 
+                              color="success" 
+                              variant="outlined"
+                              sx={{ 
+                                ml: 1,
+                                fontSize: isMobile ? '0.6rem' : '0.7rem',
+                                height: isMobile ? 18 : 22,
+                              }}
+                            />
+                          )}
+                        </TableCell>
+                        
+                        <TableCell>
+                          <Stack direction="row" spacing={0.5} justifyContent="center">
+                            <Button
+                              variant="text"
+                              startIcon={<Edit />}
+                              disabled={action.type !== 'GOOGLE_REVIEW'}
+                              color="primary"
+                              size="small"
+                              sx={{ textTransform: 'none' }}
+                            >
+                              Modifier
+                            </Button>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => remove(index)}
+                              color="error"
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  
+                  {/* Ligne d'ajout d'action */}
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" sx={{ py: 2, borderTop: fields.length > 0 ? '1px dashed #e0e0e0' : 'none' }}>
+                      <Button
+                        variant="text"
+                        startIcon={<ControlPoint />}
+                        onClick={openActionModal}
+                        color="primary"
+                        sx={{ textTransform: 'none' }}
+                      >
+                        {fields.length === 0 ? 'Ajouter votre première action' : 'Ajouter une action'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-        {/* Avertissement avec barre verticale orange */}
-        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 2, mt: 3 }}>
-          <Box
-            sx={{
-              width: 4,
-              bgcolor: '#ff9800',
-              flexShrink: 0,
-              minHeight: '100%'
-            }}
-          />
-          <Box sx={{ flex: 1, py: 1, px: 2, bgcolor: '#fff8e1', borderRadius: 1 }}>
-            <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#e65100' }}>
-              <strong>Une seule action = une seule participation</strong><br />
-              Vos clients ne joueront qu'une seule fois si vous ne proposez qu'une seule action
+            {/* Avertissement avec barre verticale orange */}
+            <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 2, mt: isMobile ? 2 : 3 }}>
+              <Box
+                sx={{
+                  width: 4,
+                  bgcolor: '#ff9800',
+                  flexShrink: 0,
+                  minHeight: '100%'
+                }}
+              />
+              <Box sx={{ 
+                flex: 1, 
+                py: 1, 
+                px: isMobile ? 1.5 : 2, 
+                bgcolor: '#fff8e1', 
+                borderRadius: 1 
+              }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontStyle: 'italic', 
+                    color: '#e65100',
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  <strong>Une seule action = une seule participation</strong><br />
+                  Vos clients ne joueront qu'une seule fois si vous ne proposez qu'une seule action
+                </Typography>
+              </Box>
+            </Box>
+          </Stack>
+        </Collapse>
+
+        {/* Modal de sélection d'action */}
+        <Dialog 
+          open={isActionModalOpen} 
+          onClose={closeActionModal} 
+          maxWidth="md" 
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              margin: isMobile ? '16px' : '32px',
+              maxHeight: isMobile ? 'calc(100% - 32px)' : 'calc(100% - 64px)',
+            },
+          }}
+        >
+          <DialogTitle sx={{ 
+            fontSize: isMobile ? '1.1rem' : '1.25rem',
+            pb: isMobile ? 1 : 2,
+          }}>
+            Choisir le type d'action
+          </DialogTitle>
+          <DialogContent sx={{ px: isMobile ? 2 : 3 }}>
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                mb: 3,
+                fontSize: isMobile ? '0.85rem' : '0.9rem',
+              }}
+            >
+              Sélectionnez le type d'action que vous souhaitez ajouter à votre campagne.
             </Typography>
-          </Box>
-        </Box>
+            
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { 
+                xs: 'repeat(1, 1fr)', 
+                sm: 'repeat(2, 1fr)', 
+                md: 'repeat(3, 1fr)' 
+              }, 
+              gap: 2 
+            }}>
+              {Object.entries(actionTypeConfig).map(([type, config]) => (
+                <Card
+                  key={type} 
+                    sx={{ 
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      border: '2px solid transparent',
+                      '&:hover': {
+                        borderColor: config.color,
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 4px 12px ${config.color}30`,
+                      },
+                    }}
+                    onClick={() => addAction(type as ActionType)}
+                  >
+                    <CardContent sx={{ 
+                      textAlign: 'center', 
+                      py: isMobile ? 2 : 3,
+                      px: isMobile ? 1.5 : 2,
+                    }}>
+                      <Box sx={{ 
+                        mb: 2, 
+                        color: config.color,
+                        '& svg': { 
+                          fontSize: isMobile ? '2rem' : '2.5rem' 
+                        }
+                      }}>
+                        {config.icon}
+                      </Box>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontSize: isMobile ? '0.9rem' : '1rem',
+                          fontWeight: 600,
+                          color: config.color,
+                          mb: 1,
+                        }}
+                      >
+                        {config.label}
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ 
+                          fontSize: isMobile ? '0.75rem' : '0.8rem',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {type === 'GOOGLE_REVIEW' && 'Demander un avis Google'}
+                        {type === 'INSTAGRAM' && 'Suivre sur Instagram'}
+                        {type === 'FACEBOOK' && 'Aimer la page Facebook'}
+                        {type === 'TIKTOK' && 'Suivre sur TikTok'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+              ))}
+                        </Box>
+          </DialogContent>
+          <DialogActions sx={{ 
+            px: isMobile ? 2 : 3,
+            pb: isMobile ? 2 : 2,
+          }}>
+                         <Button 
+               onClick={closeActionModal} 
+               size={isMobile ? 'small' : 'medium'}
+               sx={{ textTransform: 'none' }}
+             >
+               Annuler
+             </Button>
+          </DialogActions>
+        </Dialog>
       </Stack>
     </Paper>
   );

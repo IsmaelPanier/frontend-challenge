@@ -1,132 +1,93 @@
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box } from '@mui/material';
+import { Box, Drawer, useMediaQuery, IconButton } from '@mui/material';
+import { Menu as MenuIcon } from '@mui/icons-material';
+import { useState } from 'react';
 import CampaignConfigurationPage from './components/CampaignConfigurationPage';
 import Sidebar from './components/Sidebar';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
-    },
-    secondary: {
-      main: '#ff9800',
-      light: '#ffb74d',
-      dark: '#f57c00',
-    },
-    background: {
-      default: '#ffffff',
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#1a1a1a',
-      secondary: '#666666',
-    },
-  },
-  typography: {
-    fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
-    fontSize: 16,
-    h4: {
-      fontWeight: 600,
-      fontSize: '2.1rem',
-    },
-    h5: {
-      fontWeight: 600,
-      fontSize: '1.8rem',
-    },
-    h6: {
-      fontWeight: 600,
-      fontSize: '1.5rem',
-    },
-    subtitle1: {
-      fontSize: '1.2rem',
-      lineHeight: 1.6,
-    },
-    body1: {
-      fontSize: '1.1rem',
-      lineHeight: 1.6,
-    },
-    body2: {
-      fontSize: '1rem',
-      lineHeight: 1.5,
-    },
-    caption: {
-      fontSize: '0.9rem',
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          borderRadius: 0,
-          fontWeight: 500,
-          fontSize: '1rem',
-          padding: '10px 20px',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 0,
-          boxShadow: 'none',
-          border: 'none',
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 0,
-          boxShadow: 'none',
-          border: 'none',
-          padding: '24px',
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiInputBase-root': {
-            fontSize: '1rem',
-          },
-          '& .MuiInputLabel-root': {
-            fontSize: '1rem',
-          },
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        root: {
-          fontSize: '1rem',
-          padding: '16px',
-        },
-      },
-    },
-    MuiListItemText: {
-      styleOverrides: {
-        primary: {
-          fontSize: '1rem',
-        },
-        secondary: {
-          fontSize: '0.9rem',
-        },
-      },
-    },
-  },
-});
+import { theme } from './theme';
 
 function App() {
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const handleDrawerToggle = () => {
+    setMobileDrawerOpen(!mobileDrawerOpen);
+  };
+
+  const sidebarWidth = 320;
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex', width: '100%', minHeight: '100vh', bgcolor: 'background.default' }}>
-        <Sidebar />
-        <Box sx={{ flex: 1, minHeight: '100vh', overflow: 'auto' }}>
+      <Box sx={{ display: 'flex', width: '100%', minHeight: '100vh', bgcolor: 'background.default', position: 'relative' }}>
+        
+        {/* Menu hamburger mobile */}
+        {isMobile && (
+          <IconButton
+            color="primary"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{
+              position: 'fixed',
+              top: 16,
+              left: 16,
+              zIndex: 1300,
+              bgcolor: 'background.paper',
+              boxShadow: 2,
+              '&:hover': {
+                bgcolor: 'action.hover',
+              },
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* Sidebar Desktop */}
+        {!isMobile && (
+          <Box
+            sx={{
+              width: sidebarWidth,
+              flexShrink: 0,
+            }}
+          >
+            <Sidebar />
+          </Box>
+        )}
+
+        {/* Sidebar Mobile (Drawer) */}
+        {isMobile && (
+          <Drawer
+            variant="temporary"
+            anchor="left"
+            open={mobileDrawerOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile
+            }}
+            sx={{
+              '& .MuiDrawer-paper': {
+                width: sidebarWidth,
+                boxSizing: 'border-box',
+              },
+            }}
+          >
+            <Sidebar onItemClick={() => setMobileDrawerOpen(false)} />
+          </Drawer>
+        )}
+
+        {/* Contenu principal */}
+        <Box 
+          sx={{ 
+            flex: 1, 
+            minHeight: '100vh', 
+            overflow: 'auto',
+            marginLeft: isMobile ? 0 : 0, // Pas de marge car la sidebar est déjà dans un Box
+            width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
+          }}
+        >
           <CampaignConfigurationPage />
         </Box>
       </Box>
