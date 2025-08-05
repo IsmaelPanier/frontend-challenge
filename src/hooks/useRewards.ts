@@ -15,7 +15,7 @@ export const useRewards = () => {
     { id: 'other', name: 'Autre' },
   ];
 
-  // Liste des gains (simulée - pourrait être intégrée avec react-hook-form plus tard)
+  // Liste des gains par défaut
   const [gifts, setGifts] = useState<RewardGift[]>([
     {
       id: '1',

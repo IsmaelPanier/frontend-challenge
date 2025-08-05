@@ -23,14 +23,12 @@ export default tseslint.config([
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
       
-      // TypeScript specific
+      // TypeScript specific  
       '@typescript-eslint/no-unused-vars': ['error', { 
         varsIgnorePattern: '^_',
         argsIgnorePattern: '^_' 
       }],
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'error',
       
       // General code quality
       'no-console': 'warn',

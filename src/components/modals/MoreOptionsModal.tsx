@@ -32,17 +32,14 @@ const MoreOptionsModal: React.FC<MoreOptionsModalProps> = ({ open, onClose }) =>
 
   const handleSettingsClick = () => {
     alert('Configuration des paramètres...');
-    // Ici on pourrait ouvrir une autre modale ou naviguer vers une page
   };
 
   const handleHelpClick = () => {
     alert('Ouverture de l\'aide...');
-    // Ici on pourrait ouvrir une page d'aide ou documentation
   };
 
   const handleFeedbackClick = () => {
     alert('Formulaire de feedback...');
-    // Ici on pourrait ouvrir un formulaire de feedback
   };
 
   return (

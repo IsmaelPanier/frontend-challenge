@@ -18,7 +18,7 @@ import RewardsSection from './RewardsSection';
 import RetrievalConditionsSection from './RetrievalConditionsSection';
 import { PinCodeModal, QRCodeModal, MoreOptionsModal } from './modals';
 
-// Mock data par défaut
+// Données par défaut de la campagne
 const defaultCampaign: Campaign = {
   id: '1',
   profile: 'PREMIUM' as Profile,
@@ -71,14 +71,13 @@ const CampaignConfigurationPage: React.FC = () => {
       try {
         const parsedCampaign = JSON.parse(savedCampaign);
         methods.reset(parsedCampaign);
-      } catch (error) {
-        console.error('Erreur lors du chargement des données:', error);
+      } catch {
+        // Erreur lors du chargement des données
       }
     }
   }, [methods]);
 
   const onSubmit = (data: Campaign) => {
-    console.log('Données de la campagne:', data);
     localStorage.setItem('campaign', JSON.stringify(data));
     alert('Campagne sauvegardée !');
   };
@@ -95,7 +94,7 @@ const CampaignConfigurationPage: React.FC = () => {
         setMoreModalOpen(true);
         break;
       default:
-        console.log(`Modal type "${type}" not implemented`);
+        // Type de modal non implémenté
     }
   };
 

@@ -33,6 +33,7 @@ import {
   Info,
 } from '@mui/icons-material';
 import { useRewards } from '../hooks';
+import type { RewardGift } from '../types/campaign';
 
 const RewardsSection: React.FC = () => {
   const theme = useTheme();
@@ -40,7 +41,7 @@ const RewardsSection: React.FC = () => {
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingGift, setEditingGift] = useState<any>(null);
+  const [editingGift, setEditingGift] = useState<RewardGift | null>(null);
   const [giftName, setGiftName] = useState('');
   const [giftCategory, setGiftCategory] = useState('');
   const [giftStock, setGiftStock] = useState('');
@@ -64,7 +65,7 @@ const RewardsSection: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (gift: any) => {
+  const openEditModal = (gift: RewardGift) => {
     setGiftName(gift.name);
     setGiftCategory(gift.category);
     setGiftStock(gift.stock.toString());
@@ -303,7 +304,7 @@ const RewardsSection: React.FC = () => {
                       }}>
                         <Chip
                           label={gift.category}
-                          color={getCategoryColor(gift.category) as any}
+                          color={getCategoryColor(gift.category) as 'success' | 'primary' | 'info' | 'warning' | 'secondary' | 'default'}
                           variant="filled"
                           size={isMobile ? 'small' : 'medium'}
                           sx={{
@@ -322,7 +323,7 @@ const RewardsSection: React.FC = () => {
                       }}>
                         <Chip
                           label={`${gift.stock} unités`}
-                          color={getStockColor(gift.stock) as any}
+                          color={getStockColor(gift.stock) as 'success' | 'warning' | 'error'}
                           variant="filled"
                           size={isMobile ? 'small' : 'medium'}
                           sx={{

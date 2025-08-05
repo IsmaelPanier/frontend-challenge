@@ -36,7 +36,7 @@ export const usePinCode = () => {
     // Sauvegarder le PIN dans la configuration de la campagne
     setValue('configuration.pin_code', pin);
     
-    // Sauvegarder immédiatement dans localStorage pour persistance
+    // Sauvegarde en local
     const currentData = getValues();
     const updatedData = {
       ...currentData,

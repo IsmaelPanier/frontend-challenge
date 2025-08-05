@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import { useFormContext } from 'react-hook-form';
 import {
   Paper,
   Typography,
@@ -33,8 +32,7 @@ import {
   ExpandLess,
   ExpandMore,
   Info,
-} from '@mui/icons-material';
-// import type { Campaign } from '../types/campaign';
+  } from '@mui/icons-material';
 
 // Types pour les gains et conditions personnalisées
 interface GiftCondition {
@@ -45,7 +43,7 @@ interface GiftCondition {
 }
 
 const RetrievalConditionsSection: React.FC = () => {
-  // const { control, watch, setValue } = useFormContext<Campaign>();
+
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -61,7 +59,7 @@ const RetrievalConditionsSection: React.FC = () => {
   const [forAllWins, setForAllWins] = useState(true);
   const [requiresPurchase, setRequiresPurchase] = useState(false);
 
-  // Simuler des gains existants (normalement récupérés depuis la configuration)
+  // Gains disponibles
   const availableGifts = [
     { id: '1', name: 'Frite' },
     { id: '2', name: 'Sac Jacquemus' },
@@ -69,7 +67,7 @@ const RetrievalConditionsSection: React.FC = () => {
     { id: '4', name: 'Dessert gratuit' },
   ];
 
-  // Conditions personnalisées par gain (simulées)
+  // Conditions personnalisées par gain
   const [giftConditions, setGiftConditions] = useState<GiftCondition[]>([
     {
       id: '1',

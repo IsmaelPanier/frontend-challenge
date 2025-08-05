@@ -24,7 +24,7 @@ import {
   ExpandMore,
   ExpandLess,
 } from '@mui/icons-material';
-import type { Campaign } from '../../doc/CampaignType';
+import type { Campaign } from '../types/campaign';
 
 interface GameCustomizationSectionProps {
   disabled?: boolean;
@@ -59,17 +59,7 @@ const GameCustomizationSection: React.FC<GameCustomizationSectionProps> = ({ dis
     setDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-  }, []);
-
-  const handleFileUpload = (file: File) => {
+  const handleFileUpload = useCallback((file: File) => {
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -79,7 +69,17 @@ const GameCustomizationSection: React.FC<GameCustomizationSectionProps> = ({ dis
       };
       reader.readAsDataURL(file);
     }
-  };
+  }, [setValue]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  }, [handleFileUpload]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,8 +94,7 @@ const GameCustomizationSection: React.FC<GameCustomizationSectionProps> = ({ dis
   };
 
   const previewColors = () => {
-    console.log('Aperçu des couleurs:', colors);
-    alert(`Aperçu avec les couleurs:\nPrimaire: ${colors.primary}\nSecondaire: ${colors.secondary}`);
+    alert(`Aperçu avec les couleurs:\nPrimaire: ${colors?.primary}\nSecondaire: ${colors?.secondary}`);
   };
 
   return (

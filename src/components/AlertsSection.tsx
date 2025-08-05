@@ -77,7 +77,7 @@ const AlertsSection: React.FC<AlertsSectionProps> = ({ pinConfigured = false, on
       </Box>
 
       <Collapse in={isExpanded}>
-        {/* Alerte Code PIN - Design exact comme l'exemple HTML */}
+        {/* Alerte Code PIN */}
         {!pinConfigured && (
           <Box
             sx={{

@@ -36,12 +36,10 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({ open, onClose }) => {
 
   const handleDownload = () => {
     alert('Téléchargement du QR Code...');
-    // Ici on pourrait implémenter la logique de téléchargement
   };
 
   const handleShare = () => {
     alert('Partage du QR Code...');
-    // Ici on pourrait implémenter la logique de partage
   };
 
   return (
