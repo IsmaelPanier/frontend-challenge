@@ -39,6 +39,7 @@ export interface Configuration {
   gifts: Gift[];
   retrievalConditions: Conditions[];
   logo_uri: string;
+  pin_code?: string; // Code PIN de sécurité pour la récupération des cadeaux
 }
 
 
