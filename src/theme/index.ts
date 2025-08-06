@@ -108,7 +108,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          borderRadius: 0,
+          borderRadius: '8px',
           fontWeight: 500,
           fontSize: '1rem',
           padding: '10px 20px',
@@ -116,6 +116,13 @@ export const theme = createTheme({
             fontSize: '0.9rem',
             padding: '8px 16px',
           },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
         },
       },
     },

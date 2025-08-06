@@ -67,17 +67,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
     >
       {/* Logo */}
       <Box sx={{ 
-        p: isMobile ? 2 : 3, 
+        p: isMobile ? 1 : 3, 
         display: 'flex', 
         alignItems: 'center', 
         gap: 2 
       }}>
         <Avatar
           sx={{
-            width: isMobile ? 36 : 40,
-            height: isMobile ? 36 : 40,
+            width: isMobile ? 32 : 40,
+            height: isMobile ? 32 : 40,
             bgcolor: '#6366f1',
-            fontSize: isMobile ? '14px' : '16px',
+            fontSize: isMobile ? '12px' : '16px',
             fontWeight: 'bold',
           }}
         >
@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
           sx={{ 
             fontWeight: 600, 
             color: '#1a1a1a',
-            fontSize: isMobile ? '1.3rem' : '1.5rem',
+            fontSize: isMobile ? '1.1rem' : '1.5rem',
           }}
         >
           JEUX
@@ -99,14 +99,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
 
       {/* Navigation Menu */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>
-        <List sx={{ px: 1, py: 1 }}>
+        <List sx={{ px: isMobile ? 0.5 : 1, py: isMobile ? 0.5 : 1 }}>
           {menuItems.map((item, index) => (
             <ListItem
               key={index}
               component="button"
               onClick={handleItemClick}
               sx={{
-                mb: 0.5,
+                mb: isMobile ? 0.25 : 0.5,
                 borderRadius: 1,
                 bgcolor: item.active ? '#e3f2fd' : 'transparent',
                 color: item.active ? '#1976d2' : '#666666',
@@ -117,12 +117,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
                 border: 'none',
                 width: '100%',
                 textAlign: 'left',
+                py: isMobile ? 0.75 : 1,
               }}
             >
               <ListItemIcon
                 sx={{
                   color: item.active ? '#1976d2' : '#666666',
-                  minWidth: isMobile ? 36 : 40,
+                  minWidth: isMobile ? 32 : 40,
                 }}
               >
                 {item.icon}
@@ -130,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
-                  fontSize: isMobile ? '14px' : '16px',
+                  fontSize: isMobile ? '13px' : '16px',
                   fontWeight: item.active ? 600 : 400,
                 }}
               />
@@ -139,12 +140,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
                   label={item.badge}
                   size="small"
                   sx={{
-                    fontSize: isMobile ? '10px' : '11px',
-                    height: isMobile ? '18px' : '20px',
+                    fontSize: isMobile ? '9px' : '11px',
+                    height: isMobile ? '16px' : '20px',
                     bgcolor: '#e3f2fd',
                     color: '#1976d2',
                     '& .MuiChip-label': {
-                      px: 1,
+                      px: 0.5,
                     },
                   }}
                 />
@@ -153,134 +154,136 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
           ))}
         </List>
 
-                 {/* Promotional Card */}
-         <Box sx={{ mx: isMobile ? 2 : 3, my: isMobile ? 3 : 4 }}>
-           <Card sx={{ bgcolor: '#f0f4ff', border: '1px solid #e3f2fd' }}>
-             <CardContent sx={{ p: isMobile ? 2 : 3 }}>
-               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                 <Box
-                   sx={{
-                     width: isMobile ? 40 : 48,
-                     height: isMobile ? 40 : 48,
-                     bgcolor: '#ff6b6b',
-                     borderRadius: '50%',
-                     display: 'flex',
-                     alignItems: 'center',
-                     justifyContent: 'center',
-                     mr: 1.5,
-                   }}
-                 >
-                   <Typography sx={{ 
-                     color: 'white', 
-                     fontSize: isMobile ? '20px' : '24px' 
-                   }}>🎯</Typography>
-                 </Box>
-                 <Box
-                   sx={{
-                     width: isMobile ? 30 : 36,
-                     height: isMobile ? 30 : 36,
-                     bgcolor: '#4ecdc4',
-                     borderRadius: '50%',
-                     display: 'flex',
-                     alignItems: 'center',
-                     justifyContent: 'center',
-                   }}
-                 >
-                   <Typography sx={{ 
-                     color: 'white', 
-                     fontSize: isMobile ? '16px' : '18px' 
-                   }}>👤</Typography>
-                 </Box>
-               </Box>
-               <Typography 
-                 variant="body2" 
-                 sx={{ 
-                   fontWeight: 600, 
-                   mb: 1, 
-                   fontSize: isMobile ? '13px' : '14px' 
-                 }}
-               >
-                 Commandez Vos Flyers Personnalisés
-               </Typography>
-               <Typography 
-                 variant="caption" 
-                 sx={{ 
-                   color: '#666', 
-                   fontSize: isMobile ? '12px' : '13px', 
-                   lineHeight: 1.4 
-                 }}
-               >
-                 Personnalisez et commandez vos PUV pour toucher efficacement votre clientèle
-               </Typography>
-               <Button
-                 variant="contained"
-                 fullWidth
-                 sx={{
-                   mt: 2,
-                   bgcolor: '#6366f1',
-                   fontSize: isMobile ? '12px' : '13px',
-                   py: isMobile ? 0.8 : 1,
-                   textTransform: 'none',
-                   fontWeight: 600,
-                 }}
-               >
-                 COMMANDEZ
-               </Button>
-             </CardContent>
-           </Card>
-         </Box>
+        {/* Promotional Card */}
+        <Box sx={{ mx: isMobile ? 1 : 3, my: isMobile ? 2 : 4 }}>
+          <Card sx={{ bgcolor: '#f0f4ff', border: '1px solid #e3f2fd' }}>
+            <CardContent sx={{ p: isMobile ? 1.5 : 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: isMobile ? 1.5 : 2 }}>
+                <Box
+                  sx={{
+                    width: isMobile ? 36 : 48,
+                    height: isMobile ? 36 : 48,
+                    bgcolor: '#ff6b6b',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 1.5,
+                  }}
+                >
+                  <Typography sx={{ 
+                    color: 'white', 
+                    fontSize: isMobile ? '18px' : '24px' 
+                  }}>🎯</Typography>
+                </Box>
+                <Box
+                  sx={{
+                    width: isMobile ? 28 : 36,
+                    height: isMobile ? 28 : 36,
+                    bgcolor: '#4ecdc4',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography sx={{ 
+                    color: 'white', 
+                    fontSize: isMobile ? '14px' : '18px' 
+                  }}>👤</Typography>
+                </Box>
+              </Box>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 600, 
+                  mb: isMobile ? 0.75 : 1, 
+                  fontSize: isMobile ? '12px' : '14px' 
+                }}
+              >
+                Commandez Vos Flyers Personnalisés
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#666', 
+                  fontSize: isMobile ? '11px' : '13px', 
+                  lineHeight: 1.4 
+                }}
+              >
+                Personnalisez et commandez vos PUV pour toucher efficacement votre clientèle
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{
+                  mt: isMobile ? 1.5 : 2,
+                  bgcolor: '#6366f1',
+                  fontSize: isMobile ? '11px' : '13px',
+                  py: isMobile ? 0.6 : 1,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
+              >
+                COMMANDEZ
+              </Button>
+            </CardContent>
+          </Card>
+        </Box>
       </Box>
 
       {/* Bottom Section */}
-      <Box sx={{ p: isMobile ? 1.5 : 2 }}>
-        <Divider sx={{ mb: 2 }} />
+      <Box sx={{ p: isMobile ? 1 : 2 }}>
+        <Divider sx={{ mb: isMobile ? 1.5 : 2 }} />
         <List sx={{ py: 0 }}>
           <ListItem
             component="button"
             onClick={handleItemClick}
             sx={{
-              mb: 1,
+              mb: isMobile ? 0.75 : 1,
               borderRadius: 1,
               '&:hover': { bgcolor: '#f5f5f5' },
               cursor: 'pointer',
               border: 'none',
               width: '100%',
               textAlign: 'left',
+              py: isMobile ? 0.75 : 1,
             }}
           >
-            <ListItemIcon sx={{ minWidth: isMobile ? 36 : 40 }}>
+            <ListItemIcon sx={{ minWidth: isMobile ? 32 : 40 }}>
               <AccountCircle sx={{ color: '#666666' }} />
             </ListItemIcon>
-                         <ListItemText
-               primary="Compte"
-               primaryTypographyProps={{
-                 fontSize: isMobile ? '14px' : '16px',
-                 color: '#666666',
-               }}
-             />
-           </ListItem>
-           <ListItem
-             component="button"
-             onClick={handleItemClick}
-             sx={{
-               borderRadius: 1,
-               '&:hover': { bgcolor: '#f5f5f5' },
-               cursor: 'pointer',
-               border: 'none',
-               width: '100%',
-               textAlign: 'left',
-             }}
-           >
-             <ListItemIcon sx={{ minWidth: isMobile ? 36 : 40 }}>
-               <Logout sx={{ color: '#666666' }} />
-             </ListItemIcon>
-             <ListItemText
-               primary="Déconnexion"
-               primaryTypographyProps={{
-                 fontSize: isMobile ? '14px' : '16px',
-                 color: '#666666',
-               }}
-             />
+            <ListItemText
+              primary="Compte"
+              primaryTypographyProps={{
+                fontSize: isMobile ? '13px' : '16px',
+                color: '#666666',
+              }}
+            />
+          </ListItem>
+          <ListItem
+            component="button"
+            onClick={handleItemClick}
+            sx={{
+              borderRadius: 1,
+              '&:hover': { bgcolor: '#f5f5f5' },
+              cursor: 'pointer',
+              border: 'none',
+              width: '100%',
+              textAlign: 'left',
+              py: isMobile ? 0.75 : 1,
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: isMobile ? 32 : 40 }}>
+              <Logout sx={{ color: '#666666' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Déconnexion"
+              primaryTypographyProps={{
+                fontSize: isMobile ? '13px' : '16px',
+                color: '#666666',
+              }}
+            />
           </ListItem>
         </List>
       </Box>

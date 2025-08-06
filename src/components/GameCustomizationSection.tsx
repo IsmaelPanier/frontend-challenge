@@ -189,7 +189,7 @@ const GameCustomizationSection: React.FC<GameCustomizationSectionProps> = ({ dis
                         fontSize: isMobile ? '1rem' : '1.1rem',
                       }}
                     >
-                      Votre logo
+                      Glissez-déposez votre logo 
                     </Typography>
                   </Box>
                 </Box>
@@ -308,7 +308,7 @@ const GameCustomizationSection: React.FC<GameCustomizationSectionProps> = ({ dis
                         fontSize: isMobile ? '1rem' : '1.1rem',
                       }}
                     >
-                      Vos couleurs
+                      Importez vos couleurs
                     </Typography>
                     <Button
                       variant="text"

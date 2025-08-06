@@ -42,6 +42,7 @@ import {
   ControlPoint,
 } from '@mui/icons-material';
 import type { Action, ActionType, Campaign } from '../types/campaign';
+import { EditActionModal } from './modals';
 
 const actionTypeConfig = {
   GOOGLE_REVIEW: {
@@ -80,6 +81,9 @@ const ActionsSection: React.FC = () => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<Action | null>(null);
+  const [selectedActionIndex, setSelectedActionIndex] = useState<number | null>(null);
   const actions = watch('configuration.actions') || [];
 
   // Vérifier les actions en double
@@ -115,6 +119,41 @@ const ActionsSection: React.FC = () => {
 
   const closeActionModal = () => {
     setIsActionModalOpen(false);
+  };
+
+  const openEditModal = (action: Action, index: number) => {
+    setSelectedAction(action);
+    setSelectedActionIndex(index);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedAction(null);
+    setSelectedActionIndex(null);
+  };
+
+  const handleEditAction = (updatedAction: Action) => {
+    if (selectedActionIndex !== null) {
+      // Mettre à jour l'action dans le tableau
+      const updatedActions = [...actions];
+      updatedActions[selectedActionIndex] = {
+        ...updatedAction,
+        priority: selectedActionIndex + 1, // Maintenir la priorité
+      };
+      
+      // Mettre à jour le formulaire en remplaçant l'action spécifique
+      const newFields = updatedActions.map((action, index) => ({
+        id: action.id,
+        priority: index + 1,
+        target: action.target,
+        type: action.type,
+      }));
+      
+      // Remplacer toutes les actions
+      remove(); // Supprimer toutes les actions
+      newFields.forEach(action => append(action)); // Ajouter les actions mises à jour
+    }
   };
 
   const addAction = (type: ActionType) => {
@@ -356,9 +395,9 @@ const ActionsSection: React.FC = () => {
                             <Button
                               variant="text"
                               startIcon={<Edit />}
-                              disabled={action.type !== 'GOOGLE_REVIEW'}
                               color="primary"
                               size="small"
+                              onClick={() => openEditModal(action, index)}
                               sx={{ textTransform: 'none' }}
                             >
                               Modifier
@@ -438,6 +477,8 @@ const ActionsSection: React.FC = () => {
             '& .MuiDialog-paper': {
               margin: isMobile ? '16px' : '32px',
               maxHeight: isMobile ? 'calc(100% - 32px)' : 'calc(100% - 64px)',
+              borderRadius: '16px',
+              overflow: 'hidden',
             },
           }}
         >
@@ -539,6 +580,14 @@ const ActionsSection: React.FC = () => {
              </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Modal d'édition d'action */}
+        <EditActionModal
+          open={isEditModalOpen}
+          onClose={closeEditModal}
+          action={selectedAction}
+          onSave={handleEditAction}
+        />
       </Stack>
     </Paper>
   );

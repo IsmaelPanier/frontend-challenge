@@ -12,7 +12,7 @@ import {
 import {
   QrCode2,
   Save,
-  VpnKey,
+  Lock,
   MoreHoriz,
 } from '@mui/icons-material';
 
@@ -129,25 +129,37 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) 
               <Button
                 variant="outlined"
                 onClick={() => onOpenModal('pin')}
-                color="primary"
                 sx={{ 
                   minWidth: 140,
                   borderLeft: '4px solid',
-                  borderLeftColor: 'primary.main',
+                  borderLeftColor: '#9c27b0',
+                  borderColor: '#9c27b0',
+                  color: '#9c27b0',
                   textTransform: 'none',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    borderColor: '#7b1fa2',
+                    color: '#7b1fa2',
+                    bgcolor: 'rgba(156, 39, 176, 0.04)',
+                  },
                 }}
               >
                 Mon Code PIN
               </Button>
 
               <Button
-                variant="outlined"
+                variant="contained"
                 startIcon={<QrCode2 />}
                 onClick={() => onOpenModal('qr')}
-                color="warning"
                 sx={{ 
                   minWidth: 140,
                   textTransform: 'none',
+                  bgcolor: 'orange',
+                  color: 'white',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    bgcolor: '#e65100',
+                  },
                 }}
               >
                 QR Code
@@ -156,10 +168,15 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) 
               <Button
                 variant="contained"
                 onClick={onSave}
-                color="primary"
                 sx={{ 
                   minWidth: 120,
                   textTransform: 'none',
+                  bgcolor: '#1976d2',
+                  color: 'white',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    bgcolor: '#1565c0',
+                  },
                 }}
               >
                 Sauvegarder
@@ -173,6 +190,7 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) 
                   minWidth: 80,
                   textTransform: 'none',
                   color: 'text.secondary',
+                  borderRadius: '8px',
                 }}
               >
                 Plus
@@ -185,27 +203,38 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) 
             <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
               <IconButton
                 onClick={() => onOpenModal('pin')}
-                color="primary"
                 sx={{ 
                   width: 42,
                   height: 42,
                   bgcolor: 'background.paper',
                   border: '2px solid',
-                  borderColor: 'primary.main',
+                  borderColor: '#9c27b0',
+                  color: '#9c27b0',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    bgcolor: 'rgba(156, 39, 176, 0.04)',
+                    borderColor: '#7b1fa2',
+                    color: '#7b1fa2',
+                  },
                 }}
               >
-                <VpnKey fontSize="small" />
+                <Lock fontSize="small" />
               </IconButton>
 
               <IconButton
                 onClick={() => onOpenModal('qr')}
-                color="warning"
                 sx={{ 
                   width: 42,
                   height: 42,
-                  bgcolor: 'background.paper',
+                  bgcolor: 'orange',
+                  color: 'white',
                   border: '2px solid',
-                  borderColor: 'warning.main',
+                  borderColor: 'orange',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    bgcolor: '#e65100',
+                    borderColor: '#e65100',
+                  },
                 }}
               >
                 <QrCode2 fontSize="small" />
@@ -213,14 +242,14 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) 
               
               <IconButton
                 onClick={onSave}
-                color="primary"
                 sx={{ 
                   width: 42,
                   height: 42,
-                  bgcolor: 'primary.main',
+                  bgcolor: '#1976d2',
                   color: 'white',
+                  borderRadius: '8px',
                   '&:hover': {
-                    bgcolor: 'primary.dark',
+                    bgcolor: '#1565c0',
                   },
                 }}
               >
@@ -236,6 +265,7 @@ const CampaignHeader: React.FC<CampaignHeaderProps> = ({ onOpenModal, onSave }) 
                   color: 'text.secondary',
                   border: '1px solid',
                   borderColor: 'divider',
+                  borderRadius: '8px',
                 }}
               >
                 <MoreHoriz fontSize="small" />

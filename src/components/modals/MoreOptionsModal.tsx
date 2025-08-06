@@ -52,6 +52,8 @@ const MoreOptionsModal: React.FC<MoreOptionsModalProps> = ({ open, onClose }) =>
         '& .MuiDialog-paper': {
           margin: isMobile ? '16px' : '32px',
           maxHeight: isMobile ? 'calc(100% - 32px)' : 'calc(100% - 64px)',
+          borderRadius: '16px',
+          overflow: 'hidden',
         },
       }}
     >

@@ -58,6 +58,7 @@ const RetrievalConditionsSection: React.FC = () => {
   // Switches pour les conditions générales
   const [forAllWins, setForAllWins] = useState(true);
   const [requiresPurchase, setRequiresPurchase] = useState(false);
+  const [globalMinAmount, setGlobalMinAmount] = useState('');
 
   // Gains disponibles
   const availableGifts = [
@@ -116,6 +117,7 @@ const RetrievalConditionsSection: React.FC = () => {
         c.id === editingCondition.id
           ? {
               ...c,
+              giftName: selectedGift,
               condition: conditionText,
               minAmount: conditionType === 'minimum' ? parseFloat(minAmount) : undefined,
             }
@@ -173,7 +175,7 @@ const RetrievalConditionsSection: React.FC = () => {
                   fontSize: isMobile ? '1.2rem' : '1.5rem',
                 }}
               >
-                CONDITIONS DE RÉCUPÉRATION
+                DÉFINISSEZ LES  CONDITIONS POUR  RÉCUPÉRER LES CADEAUX
               </Typography>
               <Typography 
                 variant="body2" 
@@ -183,7 +185,7 @@ const RetrievalConditionsSection: React.FC = () => {
                   lineHeight: 1.4,
                 }}
               >
-                Définissez les conditions que vos clients doivent remplir pour récupérer leurs gains. Configurez les montants minimums d'achat et autres exigences.
+                Paramétrez si vos clients doivent remplir des conditions (ex: montant minimum d'achat) pour pouvoir récupérer leurs gains.
               </Typography>
             </Box>
           </Box>
@@ -216,7 +218,13 @@ const RetrievalConditionsSection: React.FC = () => {
                 control={
                   <Switch
                     checked={forAllWins}
-                    onChange={(e) => setForAllWins(e.target.checked)}
+                    onChange={(e) => {
+                      setForAllWins(e.target.checked);
+                      if (e.target.checked) {
+                        setRequiresPurchase(false);
+                        setGlobalMinAmount('');
+                      }
+                    }}
                     size={isMobile ? 'small' : 'medium'}
                   />
                 }
@@ -263,7 +271,12 @@ const RetrievalConditionsSection: React.FC = () => {
                 control={
                   <Switch
                     checked={requiresPurchase}
-                    onChange={(e) => setRequiresPurchase(e.target.checked)}
+                    onChange={(e) => {
+                      setRequiresPurchase(e.target.checked);
+                      if (e.target.checked) {
+                        setForAllWins(false);
+                      }
+                    }}
                     size={isMobile ? 'small' : 'medium'}
                   />
                 }
@@ -302,6 +315,65 @@ const RetrievalConditionsSection: React.FC = () => {
                   },
                 }}
               />
+              
+              {/* Input pour le montant minimum global */}
+              {requiresPurchase && (
+                <Box sx={{ 
+                  mt: 2, 
+                  ml: 4, 
+                  width: 'calc(100% - 32px)',
+                  maxWidth: 200,
+                }}>
+                  <TextField
+                    label="Montant minimum"
+                    type="number"
+                    value={globalMinAmount}
+                    onChange={(e) => setGlobalMinAmount(e.target.value)}
+                    placeholder="Ex: 15"
+                    size={isMobile ? 'small' : 'medium'}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: <Typography variant="body2">€</Typography>
+                    }}
+                    error={requiresPurchase && (!globalMinAmount || parseFloat(globalMinAmount) <= 0)}
+                    helperText={requiresPurchase && (!globalMinAmount || parseFloat(globalMinAmount) <= 0) ? "Veuillez saisir un montant valide" : ""}
+                    sx={{
+                      '& .MuiInputLabel-root': {
+                        fontSize: isMobile ? '0.85rem' : '0.9rem',
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: isMobile ? '0.85rem' : '0.9rem',
+                      },
+                      '& .MuiFormHelperText-root': {
+                        fontSize: isMobile ? '0.7rem' : '0.75rem',
+                      },
+                    }}
+                  />
+                  
+                  {/* Indicateur du montant configuré */}
+                  {globalMinAmount && parseFloat(globalMinAmount) > 0 && (
+                    <Box sx={{ 
+                      mt: 1, 
+                      p: 1.5, 
+                      bgcolor: 'success.50', 
+                      borderRadius: 1,
+                      border: '1px solid',
+                      borderColor: 'success.200',
+                    }}>
+                      <Typography 
+                        variant="body2" 
+                        color="success.main"
+                        sx={{
+                          fontSize: isMobile ? '0.8rem' : '0.85rem',
+                          fontWeight: 500,
+                        }}
+                      >
+                        ✓ Montant minimum configuré : {globalMinAmount}€
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Box>
             
             </Box>
@@ -572,6 +644,8 @@ const RetrievalConditionsSection: React.FC = () => {
             '& .MuiDialog-paper': {
               margin: isMobile ? '16px' : '32px',
               maxHeight: isMobile ? 'calc(100% - 32px)' : 'calc(100% - 64px)',
+              borderRadius: '16px',
+              overflow: 'hidden',
             },
           }}
         >
@@ -585,19 +659,13 @@ const RetrievalConditionsSection: React.FC = () => {
             <Stack spacing={isMobile ? 2 : 3} sx={{ mt: 1 }}>
               <TextField
                 label="Gain"
-                select
                 value={selectedGift}
                 onChange={(e) => setSelectedGift(e.target.value)}
                 fullWidth
                 size={isMobile ? 'small' : 'medium'}
-                disabled={!!editingCondition}
-              >
-                {availableGifts.map((gift) => (
-                  <MenuItem key={gift.id} value={gift.name}>
-                    {gift.name}
-                  </MenuItem>
-                ))}
-              </TextField>
+                placeholder="Ex: Frite, Café offert, etc."
+                helperText="Saisissez le nom de votre gain"
+              />
 
               <TextField
                 label="Type de condition"
@@ -643,7 +711,7 @@ const RetrievalConditionsSection: React.FC = () => {
               onClick={saveCondition} 
               variant="contained"
               color="primary"
-              disabled={!selectedGift || (conditionType === 'minimum' && (!minAmount || parseFloat(minAmount) <= 0))}
+              disabled={!selectedGift.trim() || (conditionType === 'minimum' && (!minAmount || parseFloat(minAmount) <= 0))}
               size={isMobile ? 'small' : 'medium'}
               sx={{ textTransform: 'none' }}
             >

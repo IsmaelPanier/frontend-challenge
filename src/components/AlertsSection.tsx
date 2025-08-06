@@ -10,7 +10,7 @@ import {
   Collapse,
   IconButton,
 } from '@mui/material';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { ExpandMore, ExpandLess, Lock } from '@mui/icons-material';
 
 
 interface AlertsSectionProps {
@@ -119,7 +119,7 @@ const AlertsSection: React.FC<AlertsSectionProps> = ({ pinConfigured = false, on
                   flexShrink: 0,
                 }}
               >
-                🔒
+                <Lock sx={{ fontSize : '18px'}}/>
               </Box>
               
               {/* Contenu texte */}

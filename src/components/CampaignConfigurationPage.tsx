@@ -94,7 +94,7 @@ const CampaignConfigurationPage: React.FC = () => {
         setMoreModalOpen(true);
         break;
       default:
-        // Type de modal non implémenté
+        // Type de modal non implémenté car c'est pas demandé dans l'énoncé
     }
   };
 

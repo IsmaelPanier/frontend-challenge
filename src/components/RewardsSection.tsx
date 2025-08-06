@@ -31,6 +31,7 @@ import {
   ExpandLess,
   ExpandMore,
   Info,
+  ConfirmationNumber,
 } from '@mui/icons-material';
 import { useRewards } from '../hooks';
 import type { RewardGift } from '../types/campaign';
@@ -143,7 +144,7 @@ const RewardsSection: React.FC = () => {
                   lineHeight: 1.4,
                 }}
               >
-                Gérez votre catalogue de gains, définissez les catégories et contrôlez les stocks disponibles pour votre campagne.
+                Indiquez les récompenses que vos clients pourront gagner. Offrez des cadeaux attractifs pour augmenter leur engagement et leurs fidélités.
               </Typography>
             </Box>
           </Box>
@@ -158,15 +159,24 @@ const RewardsSection: React.FC = () => {
             {/* Bouton d'ajout */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
               <Button
-                variant="outlined"
+                variant="contained"
+                endIcon={<ConfirmationNumber />}
                 size={isMobile ? 'small' : 'medium'}
-                sx={{ textTransform: 'none' }}
+                sx={{ 
+                  textTransform: 'none',
+                  bgcolor: 'orange',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#e65100',
+                  },
+                }}
               >
-                Autre action
+                Lancer le tirage au sort
+                
               </Button>
               <Button
                 variant="contained"
-                startIcon={<Add />}
+                endIcon={<Add />}
                 onClick={openAddModal}
                 color="primary"
                 size={isMobile ? 'small' : 'medium'}
@@ -394,6 +404,8 @@ const RewardsSection: React.FC = () => {
             '& .MuiDialog-paper': {
               margin: isMobile ? '16px' : '32px',
               maxHeight: isMobile ? 'calc(100% - 32px)' : 'calc(100% - 64px)',
+              borderRadius: '16px',
+              overflow: 'hidden',
             },
           }}
         >
